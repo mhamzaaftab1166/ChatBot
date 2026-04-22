@@ -10,6 +10,14 @@ import axios from 'axios';
 import TypingIndicator from './TypingIndicator';
 import ChatMessage from './ChatMessages';
 import ChatInput from './ChatInput';
+import popSound from '../../assets/sounds/pop.mp3';
+import notificationSound from '../../assets/sounds/notification.mp3';
+
+const popAudio = new Audio(popSound);
+const notificationAudio = new Audio(notificationSound);
+
+popAudio.volume = 0.5;
+notificationAudio.volume = 0.5;
 
 type FormData = {
    prompt: string;
@@ -38,6 +46,7 @@ const ChatBot = () => {
          setIsBotTyping(true);
          setError(null);
          reset({ prompt: '' });
+         popAudio.play();
 
          const { data } = await axios.post<ChatResponse>('/api/chat', {
             prompt,
@@ -45,6 +54,7 @@ const ChatBot = () => {
          });
          setMessages((prev) => [...prev, { text: data.response, role: 'bot' }]);
          setIsBotTyping(false);
+         notificationAudio.play();
       } catch (error) {
          console.error('Error fetching response:', error);
          setError('An error occurred while fetching the response.');
