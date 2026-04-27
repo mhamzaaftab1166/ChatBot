@@ -1,10 +1,9 @@
-import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
 import { conversationRepository } from '../repositories/conversation.repositories';
 import template from '../prompts/chatbot.txt';
+import { llmClient } from '../llm/client';
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 type ChatResponse = {
    message: string;
    id: string;
@@ -21,20 +20,20 @@ export const chatService = {
       conversationId: string,
       prompt: string
    ): Promise<ChatResponse> => {
-      const response = await client.responses.create({
+      const response = await llmClient.generateText({
          model: 'gpt-4o-mini',
          instructions,
-         input: prompt,
+         prompt,
          temperature: 0.3,
-         max_output_tokens: 100,
-         previous_response_id:
+         maxTokens: 100,
+         previousResponseId:
             conversationRepository.getLastResponseId(conversationId) ||
             undefined,
       });
 
       conversationRepository.setLastResponseId(conversationId, response.id);
       return {
-         message: response.output_text,
+         message: response.text,
          id: response.id,
       };
    },
